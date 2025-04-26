@@ -261,3 +261,183 @@ def jwt_auth_middleware(get_response):
     return middleware
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+import requests
+
+@csrf_exempt
+def register_token(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    token = data.get('token')
+    device_type = data.get('device_type')
+
+    if not token:
+        return JsonResponse({'error': 'Token is required'}, status=400)
+
+    request.user.expo_notification_token = token
+    request.user.device_type = device_type
+    request.user.save()
+
+    return JsonResponse({
+        'message': 'Token registered successfully',
+    }, status=200)
+
+
+
+@csrf_exempt
+def send_push_notification(request):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    user_id = data.get('user_id')
+    title = data.get('title')
+    message = data.get('message')
+
+    if not user_id or not title or not message:
+        return JsonResponse({
+            'error': 'user_id, title and message are required'
+        }, status=400)
+
+    # Get user's expo token
+    try:
+        user = User.objects.get(pk=user_id)
+        if not user.expo_notification_token:
+            return JsonResponse({
+                'error': f'No notification token found for user {user_id}'
+            }, status=404)
+        
+        token = user.expo_notification_token
+    except User.DoesNotExist:
+        return JsonResponse({
+            'error': f'User with id {user_id} not found'
+        }, status=404)
+
+    expo_push_api = 'https://exp.host/--/api/v2/push/send'
+
+    # Create message payload for single user
+    message_payload = {
+        'to': token,
+        'sound': 'default',
+        'title': title,
+        'body': message,
+        'data': data.get('data', {})
+    }
+
+    try:
+        response = requests.post(
+            expo_push_api,
+            data=json.dumps([message_payload]),  # Expo API expects an array
+            headers={
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            }
+        )
+        return JsonResponse(response.json(), status=response.status_code)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
