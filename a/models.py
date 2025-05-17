@@ -30,11 +30,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         ('blind', 'Blind'),
         ('admin', 'Admin'),
     ], default='Volunteer')
-
-
-    # Fopr push notifications
-    expo_notification_token = models.CharField(max_length=255, unique=True, null=True, blank=True)
-    device_type = models.CharField(max_length=20, null=True, blank=True)
     
 
     USERNAME_FIELD = 'email'
