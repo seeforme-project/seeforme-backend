@@ -1,3 +1,0 @@
-
-Separate from Django project. Put here for conveience, so all
-microservices run at once with same Django backend IP address.
