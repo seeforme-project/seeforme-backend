@@ -1,0 +1,7 @@
+Independent apps are pieces of code that should be run separately, in their own environment.
+
+Though they can be bundled with main backend directly, but due to hosting constraints, we choose to make them separate.
+
+Frontend connects to these separately at their own adresses and ports.
+
+1. LiveAPI Service: Connects to Google Gemini Live API via websocket. It acts as a broker between client mobile app and Gemini Live API.
