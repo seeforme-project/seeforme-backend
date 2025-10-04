@@ -1,0 +1,6 @@
+For prod, make sure to set firebase service account base64 key. for this, convert the serviceAccouintKey.json file to base64 using
+
+command: [Convert]::ToBase64String([IO.File]::ReadAllBytes("serviceAccountKey.json")) | Set-Clipboard
+
+and then paste it in prod  with secret name: FIREBASE_SERVICE_ACCOUNT_BASE64
+
