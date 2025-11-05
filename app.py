@@ -227,11 +227,21 @@ def call_volunteer_view():
             tokens=fcm_tokens, # The list of all tokens
         )
 
-        # Use send_multicast to efficiently notify everyone at once
-        response = messaging.send_multicast(message)
+        # *** MODIFIED PART ***
+        # Use send_each_for_multicast, the new API which replaces the deprecated send_multicast
+        response = messaging.send_each_for_multicast(message)
+        
         print(f'Successfully sent messages to {response.success_count} devices.')
         if response.failure_count > 0:
             print(f'Failed to send messages to {response.failure_count} devices.')
+            # OPTIONAL: You can get more detailed error reports if needed
+            # responses = response.responses
+            # failed_tokens = []
+            # for idx, resp in enumerate(responses):
+            #     if not resp.success:
+            #         # The order of responses corresponds to the order of the tokens
+            #         failed_tokens.append(fcm_tokens[idx])
+            #         print(f"  - Token {fcm_tokens[idx]} failed with error: {resp.exception}")
 
         return jsonify({'message': f'Successfully notified {response.success_count} volunteers.'}), 200
 
